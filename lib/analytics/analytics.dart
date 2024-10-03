@@ -11,6 +11,7 @@ class Analytics extends StatefulWidget {
 }
 
 class _AnalyticsState extends State<Analytics> {
+  
   List<Map<String, String>> voteRecords = [];
   DateTime? selectedDate;
   final DatabaseReference database = FirebaseDatabase.instance.ref();
@@ -25,7 +26,9 @@ class _AnalyticsState extends State<Analytics> {
   // Fetch vote records from Firebase Realtime Database
   Future<void> fetchVoteRecords() async {
     try {
-      DatabaseEvent event = await database.child('voteData').once();
+      SharedPreferences pref=await SharedPreferences.getInstance();
+      String espId=pref.getString("espId")??"";
+      DatabaseEvent event = await database.child(espId).once();
       Map data = event.snapshot.value as Map;
       
       setState(() {

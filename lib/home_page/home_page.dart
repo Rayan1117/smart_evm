@@ -6,7 +6,7 @@ import 'package:smart_evm/analytics/analytics.dart';
 class CandidateListPage extends StatefulWidget {
   final String? espId;
 
-  const CandidateListPage({Key? key, this.espId}) : super(key: key);
+  const CandidateListPage({super.key, this.espId});
 
   @override
   _CandidateListPageState createState() => _CandidateListPageState();
@@ -63,8 +63,8 @@ class _CandidateListPageState extends State<CandidateListPage> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (context) =>
-                        const Analytics()), // Navigate to Analytics
+                  builder: (context) => const Analytics(),
+                ), // Navigate to Analytics
               );
             },
             child: const Text("Go to Analytics"),
@@ -73,7 +73,9 @@ class _CandidateListPageState extends State<CandidateListPage> {
         title: const Text('Candidates List'),
       ),
       body: espId == null
-          ? const Center(child: Text('Error: ESP ID not found.'))
+          ? const Center(
+              child: Text('Error: ESP ID not found.'),
+            )
           : candidateNames.isNotEmpty
               ? ListView.builder(
                   itemCount: candidateNames.length,
