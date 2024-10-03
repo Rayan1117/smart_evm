@@ -1,6 +1,7 @@
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:smart_evm/analytics/analytics.dart';
 
 class CandidateListPage extends StatefulWidget {
   final String? espId;
@@ -56,6 +57,19 @@ class _CandidateListPageState extends State<CandidateListPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        actions: [
+          ElevatedButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) =>
+                        const Analytics()), // Navigate to Analytics
+              );
+            },
+            child: const Text("Go to Analytics"),
+          ),
+        ],
         title: const Text('Candidates List'),
       ),
       body: espId == null
