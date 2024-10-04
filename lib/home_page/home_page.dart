@@ -1,3 +1,4 @@
+import 'dart:async'; // Import the async package for Timer
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -18,6 +19,10 @@ class _CandidateListPageState extends State<CandidateListPage> {
   List<String> voteCounts = [];
   String? espId;
 
+  final int maxVotes = 400; // Initialize the maximum votes
+  int totalPolledVotes = 0; // Variable to hold total polled votes
+  Timer? _timer; // Timer for periodic fetching
+
   @override
   void initState() {
     super.initState();
@@ -30,7 +35,8 @@ class _CandidateListPageState extends State<CandidateListPage> {
 
     if (espId != null) {
       _databaseRef = FirebaseDatabase.instance.ref().child(espId!);
-      _fetchCandidates();
+      _fetchCandidates(); // Initial fetch for candidates
+      _startPeriodicFetch(); // Start fetching data every 2 seconds
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Error: ESP ID not found')),
@@ -45,12 +51,26 @@ class _CandidateListPageState extends State<CandidateListPage> {
       setState(() {
         candidateNames = data['candidate_names'].split(',');
         voteCounts = data['vote_count'].split(',');
+        // Calculate total polled votes
+        totalPolledVotes = voteCounts.map(int.parse).reduce((a, b) => a + b);
       });
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('No candidates found for this ESP ID')),
       );
     }
+  }
+
+  void _startPeriodicFetch() {
+    _timer = Timer.periodic(const Duration(seconds: 2), (Timer timer) {
+      _fetchCandidates(); // Fetch candidates every 2 seconds
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel(); // Cancel the timer when the widget is disposed
+    super.dispose();
   }
 
   @override
@@ -87,6 +107,27 @@ class _CandidateListPageState extends State<CandidateListPage> {
                   },
                 )
               : const Center(child: CircularProgressIndicator()),
+      bottomNavigationBar: Container(
+        color: Colors.blue,
+        padding: const EdgeInsets.all(16.0),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'Max Votes: $maxVotes',
+              style: const TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Votes Polled: $totalPolledVotes',
+              style: const TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Remaining: ${maxVotes - totalPolledVotes}',
+              style: const TextStyle(color: Colors.white),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

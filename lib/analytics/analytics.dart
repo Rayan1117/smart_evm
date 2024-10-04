@@ -35,6 +35,7 @@ class _AnalyticsState extends State<Analytics> {
         setState(() {
           voteRecords = [];
           if (data.containsKey('vote_details')) {
+            print(true);
             List<dynamic> voteDetails = data['vote_details'] as List<dynamic>;
             for (var detail in voteDetails) {
               DateTime timestamp = DateTime.parse(detail['timestamp']);
