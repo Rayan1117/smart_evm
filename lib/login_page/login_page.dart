@@ -80,6 +80,7 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
+        // Gradient background
         decoration: const BoxDecoration(
           gradient: LinearGradient(
             colors: [Color(0xff10002b), Color(0xff7A1CAC)],
@@ -96,36 +97,63 @@ class _LoginPageState extends State<LoginPage> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 const Text(
-                  "Login",
+                  "MOUNT ZION SILVER JUBILEE SCHOOL",
                   style: TextStyle(
-                    fontSize: 32,
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
+                      color: Colors.white,
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold),
+                  textAlign: TextAlign.center,
+                ),
+                const Text(
+                  "ELECTION PORTAL",
+                  style: TextStyle(
+                      color: Colors.yellow,
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 24),
-                TextField(
-                  controller: _espIdController,
-                  decoration: InputDecoration(
-                    labelText: "ESP ID",
-                    filled: true,
-                    fillColor: Colors.white.withOpacity(0.8),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
+                Padding(
+                  padding: const EdgeInsets.all(10.0),
+                  child: TextField(
+                    controller: _espIdController,
+                    style: const TextStyle(color: Colors.white),
+                    decoration: InputDecoration(
+                      enabledBorder: const OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.white, width: 1.5),
+                      ),
+                      border: const OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.white, width: 1.5),
+                      ),
+                      focusedBorder: const OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.white, width: 1.5),
+                      ),
+                      labelText: 'ESP ID',
+                      hintText: 'Enter ESP ID',
+                      hintStyle: const TextStyle(color: Colors.white),
+                      labelStyle: const TextStyle(color: Colors.white),
                     ),
                   ),
                 ),
                 const SizedBox(height: 16),
-                TextField(
-                  controller: _passwordController,
-                  obscureText: true,
-                  decoration: InputDecoration(
-                    labelText: "Password",
-                    filled: true,
-                    fillColor: Colors.white.withOpacity(0.8),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
+                Padding(
+                  padding: const EdgeInsets.all(10.0),
+                  child: TextField(
+                    controller: _passwordController,
+                    style: const TextStyle(color: Colors.white),
+                    obscureText: true,
+                    decoration: InputDecoration(
+                      enabledBorder: const OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.white, width: 1.5),
+                      ),
+                      border: const OutlineInputBorder(),
+                      focusedBorder: const OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.white, width: 1.5),
+                      ),
+                      labelText: 'Password',
+                      hintText: 'Enter Password',
+                      hintStyle: const TextStyle(color: Colors.white),
+                      labelStyle: const TextStyle(color: Colors.white),
                     ),
                   ),
                 ),
@@ -138,7 +166,11 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                   child: const Text(
                     "LOGIN",
-                    style: TextStyle(fontSize: 18),
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12.0,
+                      color: Colors.black,
+                    ),
                   ),
                 ),
               ],

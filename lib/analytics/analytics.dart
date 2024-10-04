@@ -99,50 +99,45 @@ class _AnalyticsState extends State<Analytics> {
 
   double getMaxYValue() {
     List<FlSpot> hourlyVotes = getHourlyVoteData();
-    double maxVote = hourlyVotes.map((spot) => spot.y).reduce((a, b) => a > b ? a : b);
+    double maxVote =
+        hourlyVotes.map((spot) => spot.y).reduce((a, b) => a > b ? a : b);
     return maxVote + 1; // Adding 1 for a better visual gap
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        leading: IconButton(
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+          icon: const Icon(
+            Icons.arrow_back_rounded,
+            color: Color.fromARGB(255, 255, 255, 255),
+          ),
+        ),
+        backgroundColor: const Color(0xff10002b),
+        centerTitle: true,
+        title: const Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text("MOUNT ZION SILVER JUBILEE SCHOOL",
+                style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold)),
+            Text("GRAPH",
+                style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold)),
+          ],
+        ),
+      ),
       backgroundColor: Colors.black87,
       body: Column(
         children: [
-          // Top Header
-          Padding(
-            padding: const EdgeInsets.only(bottom: 10),
-            child: Container(
-              height: 60,
-              width: double.infinity,
-              decoration: BoxDecoration(color: const Color(0xff0245a4)),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  IconButton(
-                    onPressed: () => Navigator.pop(context),
-                    icon: const Icon(Icons.keyboard_double_arrow_left,
-                        color: Colors.white, size: 40),
-                  ),
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: const [
-                      Text("MOUNT ZION SILVER JUBILEE SCHOOL",
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold)),
-                      Text("GRAPH",
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold)),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ),
           // Date Picker
           Padding(
             padding: const EdgeInsets.all(8.0),
@@ -172,9 +167,13 @@ class _AnalyticsState extends State<Analytics> {
           // Display messages or graph for vote records
           Expanded(
             child: selectedDate == null
-                ? const Center(child: Text("Please pick a date", style: TextStyle(color: Colors.white)))
+                ? const Center(
+                    child: Text("Please pick a date",
+                        style: TextStyle(color: Colors.white)))
                 : voteRecords.isEmpty
-                    ? const Center(child: Text("No data available", style: TextStyle(color: Colors.white)))
+                    ? const Center(
+                        child: Text("No data available",
+                            style: TextStyle(color: Colors.white)))
                     : Padding(
                         padding: const EdgeInsets.all(40),
                         child: LineChart(
@@ -184,12 +183,14 @@ class _AnalyticsState extends State<Analytics> {
                                 sideTitles: SideTitles(
                                   showTitles: true,
                                   reservedSize: 40,
-                                  interval: 1, // Set an interval to display every count
+                                  interval:
+                                      1, // Set an interval to display every count
                                   getTitlesWidget: (value, meta) {
                                     if (value % 1 == 0) {
                                       return Text(
                                         '${value.toInt()}',
-                                        style: const TextStyle(color: Colors.white),
+                                        style: const TextStyle(
+                                            color: Colors.white),
                                       );
                                     }
                                     return Container(); // Return an empty container for other values
@@ -203,7 +204,8 @@ class _AnalyticsState extends State<Analytics> {
                                   getTitlesWidget: (value, meta) {
                                     return Text(
                                       '${value.toInt()}:00',
-                                      style: const TextStyle(color: Colors.white),
+                                      style:
+                                          const TextStyle(color: Colors.white),
                                     );
                                   },
                                 ),
@@ -215,11 +217,12 @@ class _AnalyticsState extends State<Analytics> {
                                 spots: getHourlyVoteData(),
                                 isCurved: true,
                                 color: Colors.blue,
-                                dotData: FlDotData(show: true),
+                                dotData: const FlDotData(show: true),
                                 belowBarData: BarAreaData(show: false),
                               ),
                             ],
-                            maxY: getMaxYValue(), // Specify max Y value based on your data
+                            maxY:
+                                getMaxYValue(), // Specify max Y value based on your data
                           ),
                         ),
                       ),
