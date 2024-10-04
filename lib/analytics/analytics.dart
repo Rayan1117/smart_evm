@@ -2,8 +2,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:fl_chart/fl_chart.dart'; // Import the chart library
-import 'package:intl/intl.dart'; // For date formatting
+import 'package:fl_chart/fl_chart.dart';
+import 'package:intl/intl.dart';
 
 class Analytics extends StatefulWidget {
   const Analytics({super.key});
@@ -20,41 +20,25 @@ class _AnalyticsState extends State<Analytics> {
   @override
   void initState() {
     super.initState();
-    loadSharedPreferences(); // Load saved state (selected date)
-    fetchVoteRecords(); // Fetch the vote records when the widget initializes
+    loadSharedPreferences();
+    fetchVoteRecords();
   }
 
-  // Fetch vote records from Firebase Realtime Database
   Future<void> fetchVoteRecords() async {
     try {
-      SharedPreferences pref = await SharedPreferences.getInstance();
-      String espId = pref.getString("espId") ?? "";
-      print("Selected ESP ID: $espId");
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String espId = prefs.getString("espId") ?? "";
 
       DatabaseEvent event = await database.child(espId).once();
-
       if (event.snapshot.value != null) {
         Map data = event.snapshot.value as Map;
-        print("Fetched data: $data");
-
         setState(() {
-          voteRecords = []; // Reset records
-
-          // Navigate through the data structure
+          voteRecords = [];
           if (data.containsKey('vote_details')) {
             List<dynamic> voteDetails = data['vote_details'] as List<dynamic>;
-
-            // Loop through each entry in vote_details
             for (var detail in voteDetails) {
-              // Extract timestamp from each detail
               DateTime timestamp = DateTime.parse(detail['timestamp']);
-              print("Vote timestamp: $timestamp");
-
-              // Create a model for each vote's timestamp
-              voteRecords.add({
-                "vote_no": voteRecords.length, // Use the current length as the vote number
-                "timestamp": timestamp, // Store the timestamp
-              });
+              voteRecords.add({"timestamp": timestamp});
             }
           }
         });
@@ -64,7 +48,6 @@ class _AnalyticsState extends State<Analytics> {
     }
   }
 
-  // Load selected date from SharedPreferences
   Future<void> loadSharedPreferences() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? dateStr = prefs.getString('selectedDate');
@@ -75,56 +58,43 @@ class _AnalyticsState extends State<Analytics> {
     }
   }
 
-  // Save selected date in SharedPreferences
   Future<void> saveSharedPreferences(DateTime date) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setString('selectedDate', date.toIso8601String());
   }
 
-  // Check if two dates are the same
   bool isSameDate(DateTime date1, DateTime date2) {
     return date1.year == date2.year &&
         date1.month == date2.month &&
         date1.day == date2.day;
   }
 
-  // Filter vote records by the selected date
   List<Map<String, dynamic>> filterVoteRecordsByDate() {
     if (selectedDate == null) return [];
-
     return voteRecords.where((record) {
-      DateTime recordDate = record['timestamp'];
-      return isSameDate(recordDate, selectedDate!);
+      return isSameDate(record['timestamp'], selectedDate!);
     }).toList();
   }
 
-  // Group votes by 1-hour intervals
-  List<BarChartGroupData> getHourlyVoteData() {
+  List<FlSpot> getHourlyVoteData() {
     Map<int, int> hourlyVotes = {};
-
-    // Get only the filtered records for the selected date
     List<Map<String, dynamic>> filteredRecords = filterVoteRecordsByDate();
 
     for (var record in filteredRecords) {
       DateTime timestamp = record['timestamp'];
       int hour = timestamp.hour;
-
       hourlyVotes[hour] = (hourlyVotes[hour] ?? 0) + 1;
     }
 
-    // Convert to BarChartGroupData
-    return hourlyVotes.entries.map((entry) {
-      return BarChartGroupData(
-        x: entry.key, // Hour of the day (0 to 23)
-        barRods: [
-          BarChartRodData(
-            toY: entry.value.toDouble(), // Number of votes
-            color: Colors.blue,
-            width: 16,
-          ),
-        ],
-      );
-    }).toList();
+    return List.generate(24, (index) {
+      return FlSpot(index.toDouble(), (hourlyVotes[index] ?? 0).toDouble());
+    });
+  }
+
+  double getMaxYValue() {
+    List<FlSpot> hourlyVotes = getHourlyVoteData();
+    double maxVote = hourlyVotes.map((spot) => spot.y).reduce((a, b) => a > b ? a : b);
+    return maxVote + 1; // Adding 1 for a better visual gap
   }
 
   @override
@@ -133,40 +103,34 @@ class _AnalyticsState extends State<Analytics> {
       backgroundColor: Colors.black87,
       body: Column(
         children: [
-          // Top Header and Navigation to EspVotesPage
+          // Top Header
           Padding(
             padding: const EdgeInsets.only(bottom: 10),
             child: Container(
               height: 60,
-              width: MediaQuery.of(context).size.width,
+              width: double.infinity,
               decoration: BoxDecoration(color: const Color(0xff0245a4)),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   IconButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
+                    onPressed: () => Navigator.pop(context),
                     icon: const Icon(Icons.keyboard_double_arrow_left,
                         color: Colors.white, size: 40),
                   ),
                   Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: const [
-                      Text(
-                        "MOUNT ZION SILVER JUBILEE SCHOOL",
-                        style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold),
-                      ),
-                      Text(
-                        "GRAPH",
-                        style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold),
-                      ),
+                      Text("MOUNT ZION SILVER JUBILEE SCHOOL",
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold)),
+                      Text("GRAPH",
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold)),
                     ],
                   ),
                 ],
@@ -187,9 +151,8 @@ class _AnalyticsState extends State<Analytics> {
                 if (pickedDate != null) {
                   setState(() {
                     selectedDate = pickedDate;
-                    saveSharedPreferences(
-                        pickedDate); // Save date in shared preferences
-                    fetchVoteRecords(); // Re-fetch records for new date
+                    saveSharedPreferences(pickedDate);
+                    fetchVoteRecords();
                   });
                 }
               },
@@ -206,30 +169,52 @@ class _AnalyticsState extends State<Analytics> {
                 ? const Center(child: CircularProgressIndicator())
                 : Padding(
                     padding: const EdgeInsets.all(8.0),
-                    child: BarChart(
-                      BarChartData(
-                        alignment: BarChartAlignment.spaceAround,
-                        barGroups: getHourlyVoteData(),
+                    child: LineChart(
+                      LineChartData(
                         titlesData: FlTitlesData(
                           leftTitles: AxisTitles(
-                            sideTitles: SideTitles(showTitles: true),
+                            sideTitles: SideTitles(
+                              showTitles: true,
+                              reservedSize: 40,
+                              interval: 1, // Set an interval to display every count
+                              getTitlesWidget: (value, meta) {
+                                if (value % 1 == 0) {
+                                  return Text(
+                                    '${value.toInt()}',
+                                    style: const TextStyle(color: Colors.white),
+                                  );
+                                }
+                                return Container(); // Return an empty container for other values
+                              },
+                            ),
                           ),
                           bottomTitles: AxisTitles(
                             sideTitles: SideTitles(
                               showTitles: true,
-                              getTitlesWidget: (value, meta) {
-                                // Show hours as titles on the x-axis
-                                return Text('${value.toInt()}:00',
-                                    style:
-                                        const TextStyle(color: Colors.white));
-                              },
                               reservedSize: 30,
+                              getTitlesWidget: (value, meta) {
+                                return Text(
+                                  '${value.toInt()}:00',
+                                  style: const TextStyle(color: Colors.white),
+                                );
+                              },
                             ),
                           ),
                         ),
-                        borderData: FlBorderData(show: false),
+                        borderData: FlBorderData(show: true),
+                        lineBarsData: [
+                          LineChartBarData(
+                            spots: getHourlyVoteData(),
+                            isCurved: true,
+                            color: Colors.blue,
+                            dotData: FlDotData(show: true),
+                            belowBarData: BarAreaData(show: false),
+                          ),
+                        ],
+                        maxY: getMaxYValue(), // Specify max Y value based on your data
                       ),
-                    )),
+                    ),
+                  ),
           ),
         ],
       ),
