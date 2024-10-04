@@ -172,7 +172,7 @@ class _CandidateListPageState extends State<CandidateListPage> {
         actions: [
           IconButton(
             onPressed: () {
-              Navigator.push(
+              Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(
                   builder: (context) => const Analytics(),

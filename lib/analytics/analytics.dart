@@ -4,6 +4,7 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
+import 'package:smart_evm/home_page/home_page.dart';
 
 class Analytics extends StatefulWidget {
   const Analytics({super.key});
@@ -110,7 +111,11 @@ class _AnalyticsState extends State<Analytics> {
       appBar: AppBar(
         leading: IconButton(
           onPressed: () {
-            Navigator.of(context).pop();
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(
+                builder: (context) => const CandidateListPage(),
+              ),
+            );
           },
           icon: const Icon(
             Icons.arrow_back_rounded,
