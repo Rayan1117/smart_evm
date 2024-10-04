@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:smart_evm/glassmorph/glassmorph.dart';
 import 'package:smart_evm/home_page/home_page.dart';
 
 class LoginPage extends StatefulWidget {
@@ -29,7 +30,8 @@ class _LoginPageState extends State<LoginPage> {
       String espId = prefs.getString('espId') ?? '';
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => CandidateListPage(espId: espId)),
+        MaterialPageRoute(
+            builder: (context) => CandidateListPage(espId: espId)),
       );
     }
   }
@@ -42,7 +44,8 @@ class _LoginPageState extends State<LoginPage> {
       DataSnapshot snapshot = await _database.child(espId).get();
 
       if (snapshot.exists) {
-        Map<dynamic, dynamic> userData = snapshot.value as Map<dynamic, dynamic>;
+        Map<dynamic, dynamic> userData =
+            snapshot.value as Map<dynamic, dynamic>;
 
         if (userData['password'] == password) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -78,70 +81,86 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    double screenheight = MediaQuery.of(context).size.height;
+    double screenwidth = MediaQuery.of(context).size.width;
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Color(0xff10002b), Color(0xff7A1CAC)],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            stops: [0.55, 1],
+      body: Expanded(
+        child: Container(
+          //background Container
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Color(0xff10002b), Color(0xff7A1CAC)],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              stops: [0.55, 1],
+            ),
           ),
-        ),
-        child: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                const Text(
-                  "Login",
-                  style: TextStyle(
-                    fontSize: 32,
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
+          child: Center(
+            child: Glassmorph(
+              //from grallmorph file
+              blur: 0.2,
+              opacity: 0.2,
+              child: Container(
+                height: screenheight * 0.5,
+                width: screenwidth < 1400
+                    ? screenwidth * 0.45
+                    : screenwidth * 0.25,
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      const Text(
+                        "Login",
+                        style: TextStyle(
+                          fontSize: 32,
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 24),
+                      TextField(
+                        controller: _espIdController,
+                        decoration: InputDecoration(
+                          labelText: "ESP ID",
+                          filled: true,
+                          fillColor: Colors.white.withOpacity(0.8),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      TextField(
+                        controller: _passwordController,
+                        obscureText: true,
+                        decoration: InputDecoration(
+                          labelText: "Password",
+                          filled: true,
+                          fillColor: Colors.white.withOpacity(0.8),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      ElevatedButton(
+                        onPressed: _login,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blueAccent,
+                          padding: const EdgeInsets.symmetric(vertical: 16.0),
+                        ),
+                        child: const Text(
+                          "LOGIN",
+                          style: TextStyle(fontSize: 18, color: Colors.white),
+                        ),
+                      ),
+                    ],
                   ),
-                  textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: 24),
-                TextField(
-                  controller: _espIdController,
-                  decoration: InputDecoration(
-                    labelText: "ESP ID",
-                    filled: true,
-                    fillColor: Colors.white.withOpacity(0.8),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                TextField(
-                  controller: _passwordController,
-                  obscureText: true,
-                  decoration: InputDecoration(
-                    labelText: "Password",
-                    filled: true,
-                    fillColor: Colors.white.withOpacity(0.8),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 24),
-                ElevatedButton(
-                  onPressed: _login,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blueAccent,
-                    padding: const EdgeInsets.symmetric(vertical: 16.0),
-                  ),
-                  child: const Text(
-                    "LOGIN",
-                    style: TextStyle(fontSize: 18),
-                  ),
-                ),
-              ],
+              ),
             ),
           ),
         ),
