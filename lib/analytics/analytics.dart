@@ -33,9 +33,8 @@ class _AnalyticsState extends State<Analytics> {
       if (event.snapshot.value != null) {
         Map data = event.snapshot.value as Map;
         setState(() {
-          voteRecords = [];
+          voteRecords = []; // Initialize to an empty list
           if (data.containsKey('vote_details')) {
-            print(true);
             List<dynamic> voteDetails = data['vote_details'] as List<dynamic>;
             for (var detail in voteDetails) {
               DateTime timestamp = DateTime.parse(detail['timestamp']);
@@ -43,9 +42,15 @@ class _AnalyticsState extends State<Analytics> {
             }
           }
         });
+      } else {
+        // No data case
+        setState(() {
+          voteRecords = []; // Ensure it's empty
+        });
       }
     } catch (e) {
       print('Error fetching data: $e');
+      // Handle errors as needed
     }
   }
 
@@ -164,58 +169,60 @@ class _AnalyticsState extends State<Analytics> {
               ),
             ),
           ),
-          // Display graph for vote records
+          // Display messages or graph for vote records
           Expanded(
-            child: voteRecords.isEmpty
-                ? const Center(child: CircularProgressIndicator())
-                : Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: LineChart(
-                      LineChartData(
-                        titlesData: FlTitlesData(
-                          leftTitles: AxisTitles(
-                            sideTitles: SideTitles(
-                              showTitles: true,
-                              reservedSize: 40,
-                              interval: 1, // Set an interval to display every count
-                              getTitlesWidget: (value, meta) {
-                                if (value % 1 == 0) {
-                                  return Text(
-                                    '${value.toInt()}',
-                                    style: const TextStyle(color: Colors.white),
-                                  );
-                                }
-                                return Container(); // Return an empty container for other values
-                              },
+            child: selectedDate == null
+                ? const Center(child: Text("Please pick a date", style: TextStyle(color: Colors.white)))
+                : voteRecords.isEmpty
+                    ? const Center(child: Text("No data available", style: TextStyle(color: Colors.white)))
+                    : Padding(
+                        padding: const EdgeInsets.all(40),
+                        child: LineChart(
+                          LineChartData(
+                            titlesData: FlTitlesData(
+                              leftTitles: AxisTitles(
+                                sideTitles: SideTitles(
+                                  showTitles: true,
+                                  reservedSize: 40,
+                                  interval: 1, // Set an interval to display every count
+                                  getTitlesWidget: (value, meta) {
+                                    if (value % 1 == 0) {
+                                      return Text(
+                                        '${value.toInt()}',
+                                        style: const TextStyle(color: Colors.white),
+                                      );
+                                    }
+                                    return Container(); // Return an empty container for other values
+                                  },
+                                ),
+                              ),
+                              bottomTitles: AxisTitles(
+                                sideTitles: SideTitles(
+                                  showTitles: true,
+                                  reservedSize: 30,
+                                  getTitlesWidget: (value, meta) {
+                                    return Text(
+                                      '${value.toInt()}:00',
+                                      style: const TextStyle(color: Colors.white),
+                                    );
+                                  },
+                                ),
+                              ),
                             ),
-                          ),
-                          bottomTitles: AxisTitles(
-                            sideTitles: SideTitles(
-                              showTitles: true,
-                              reservedSize: 30,
-                              getTitlesWidget: (value, meta) {
-                                return Text(
-                                  '${value.toInt()}:00',
-                                  style: const TextStyle(color: Colors.white),
-                                );
-                              },
-                            ),
+                            borderData: FlBorderData(show: true),
+                            lineBarsData: [
+                              LineChartBarData(
+                                spots: getHourlyVoteData(),
+                                isCurved: true,
+                                color: Colors.blue,
+                                dotData: FlDotData(show: true),
+                                belowBarData: BarAreaData(show: false),
+                              ),
+                            ],
+                            maxY: getMaxYValue(), // Specify max Y value based on your data
                           ),
                         ),
-                        borderData: FlBorderData(show: true),
-                        lineBarsData: [
-                          LineChartBarData(
-                            spots: getHourlyVoteData(),
-                            isCurved: true,
-                            color: Colors.blue,
-                            dotData: FlDotData(show: true),
-                            belowBarData: BarAreaData(show: false),
-                          ),
-                        ],
-                        maxY: getMaxYValue(), // Specify max Y value based on your data
                       ),
-                    ),
-                  ),
           ),
         ],
       ),

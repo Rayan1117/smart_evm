@@ -15,6 +15,7 @@ class CandidateListPage extends StatefulWidget {
 
 class _CandidateListPageState extends State<CandidateListPage> {
   late DatabaseReference _databaseRef;
+  List<String> vicecandidate_name=[];
   List<String> candidateNames = [];
   List<String> voteCounts = [];
   String? espId;
@@ -49,6 +50,7 @@ class _CandidateListPageState extends State<CandidateListPage> {
     if (snapshot.exists) {
       Map<dynamic, dynamic> data = snapshot.value as Map<dynamic, dynamic>;
       setState(() {
+        vicecandidate_name=data['vicecandidate_names'].split(',');
         candidateNames = data['candidate_names'].split(',');
         voteCounts = data['vote_count'].split(',');
         // Calculate total polled votes
@@ -73,10 +75,55 @@ class _CandidateListPageState extends State<CandidateListPage> {
     super.dispose();
   }
 
+  Widget tile(String name,String vicename, String votes) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
+      child: Container(
+        height: 100,
+        decoration:const BoxDecoration(
+          color:  Color(0xffffdec0),
+          borderRadius: BorderRadius.all(Radius.circular(20)),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              child: Row(
+                
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
+                    children: [
+                      Text(
+                        name,
+                        style: const TextStyle(color: Colors.black, fontSize: 16, fontWeight: FontWeight.bold),
+                      ),
+                      Text(
+                        vicename,
+                        style: const TextStyle(color: Colors.black, fontSize: 16, fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  ),
+                  Text(
+                    votes,
+                    style: const TextStyle(color: Colors.black, fontSize: 14),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.black87,
       appBar: AppBar(
+        title: const Text('Candidates List'),
         actions: [
           ElevatedButton(
             onPressed: () {
@@ -90,25 +137,22 @@ class _CandidateListPageState extends State<CandidateListPage> {
             child: const Text("Go to Analytics"),
           ),
         ],
-        title: const Text('Candidates List'),
+        backgroundColor: const Color(0xff0245a4),
       ),
       body: espId == null
           ? const Center(
               child: Text('Error: ESP ID not found.'),
             )
-          : candidateNames.isNotEmpty
+          :( candidateNames.isNotEmpty && vicecandidate_name.isNotEmpty)
               ? ListView.builder(
                   itemCount: candidateNames.length,
                   itemBuilder: (context, index) {
-                    return ListTile(
-                      title: Text(candidateNames[index]),
-                      subtitle: Text('Votes: ${voteCounts[index]}'),
-                    );
+                    return tile(candidateNames[index],vicecandidate_name[index], voteCounts[index]);
                   },
                 )
               : const Center(child: CircularProgressIndicator()),
       bottomNavigationBar: Container(
-        color: Colors.blue,
+        color: const Color(0xff0245a4),
         padding: const EdgeInsets.all(16.0),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
