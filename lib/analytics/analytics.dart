@@ -2,6 +2,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:fl_chart/fl_chart.dart';
+import 'package:intl/intl.dart';
 
 class Analytics extends StatefulWidget {
   const Analytics({super.key});
@@ -11,47 +13,47 @@ class Analytics extends StatefulWidget {
 }
 
 class _AnalyticsState extends State<Analytics> {
-  
-  List<Map<String, String>> voteRecords = [];
+  List<Map<String, dynamic>> voteRecords = [];
   DateTime? selectedDate;
   final DatabaseReference database = FirebaseDatabase.instance.ref();
-  
+
   @override
   void initState() {
     super.initState();
-    loadSharedPreferences(); // Load saved state (selected date)
-    fetchVoteRecords();  // Fetch the vote records when the widget initializes
+    loadSharedPreferences();
+    fetchVoteRecords();
   }
 
-  // Fetch vote records from Firebase Realtime Database
   Future<void> fetchVoteRecords() async {
     try {
-      SharedPreferences pref=await SharedPreferences.getInstance();
-      String espId=pref.getString("espId")??"";
-      DatabaseEvent event = await database.child(espId).once();
-      Map data = event.snapshot.value as Map;
-      
-      setState(() {
-        voteRecords = []; // Reset records
-        data.forEach((key, value) {
-          List<String> candidateNames = value['candidate_names'].toString().split(',');
-          List<String> voteCounts = value['vote_count'].toString().split(',');
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String espId = prefs.getString("espId") ?? "";
 
-          for (int i = 0; i < candidateNames.length; i++) {
-            voteRecords.add({
-              "candidate": candidateNames[i],
-              "vote_count": voteCounts[i],
-              "esp8266Id": key, // Assuming ESP key is the unique identifier
-            });
+      DatabaseEvent event = await database.child(espId).once();
+      if (event.snapshot.value != null) {
+        Map data = event.snapshot.value as Map;
+        setState(() {
+          voteRecords = []; // Initialize to an empty list
+          if (data.containsKey('vote_details')) {
+            List<dynamic> voteDetails = data['vote_details'] as List<dynamic>;
+            for (var detail in voteDetails) {
+              DateTime timestamp = DateTime.parse(detail['timestamp']);
+              voteRecords.add({"timestamp": timestamp});
+            }
           }
         });
-      });
+      } else {
+        // No data case
+        setState(() {
+          voteRecords = []; // Ensure it's empty
+        });
+      }
     } catch (e) {
       print('Error fetching data: $e');
+      // Handle errors as needed
     }
   }
 
-  // Load selected date from SharedPreferences
   Future<void> loadSharedPreferences() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? dateStr = prefs.getString('selectedDate');
@@ -62,37 +64,43 @@ class _AnalyticsState extends State<Analytics> {
     }
   }
 
-  // Save selected date in SharedPreferences
   Future<void> saveSharedPreferences(DateTime date) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setString('selectedDate', date.toIso8601String());
   }
 
-  // Navigate to EspVotesPage (if applicable)
-  void navigateToEspVotesPage() {
-    // Navigator.push(
-    //   context,
-    //   MaterialPageRoute(
-    //     builder: (context) => EspVotesPage(
-    //       espVotes: getVotesPerEspId(),
-    //       selectedDate: selectedDate != null ? _formatDate(selectedDate!) : null,
-    //     ),
-    //   ),
-    // );
+  bool isSameDate(DateTime date1, DateTime date2) {
+    return date1.year == date2.year &&
+        date1.month == date2.month &&
+        date1.day == date2.day;
   }
 
-  // Extract vote counts per ESP
-  Map<String, int> getVotesPerEspId() {
-    Map<String, int> espVotes = {};
+  List<Map<String, dynamic>> filterVoteRecordsByDate() {
+    if (selectedDate == null) return [];
+    return voteRecords.where((record) {
+      return isSameDate(record['timestamp'], selectedDate!);
+    }).toList();
+  }
 
-    for (var vote in voteRecords) {
-      String espId = vote["esp8266Id"] ?? '';
-      if (espId.isNotEmpty) {
-        espVotes[espId] = (espVotes[espId] ?? 0) + int.parse(vote["vote_count"]!);
-      }
+  List<FlSpot> getHourlyVoteData() {
+    Map<int, int> hourlyVotes = {};
+    List<Map<String, dynamic>> filteredRecords = filterVoteRecordsByDate();
+
+    for (var record in filteredRecords) {
+      DateTime timestamp = record['timestamp'];
+      int hour = timestamp.hour;
+      hourlyVotes[hour] = (hourlyVotes[hour] ?? 0) + 1;
     }
 
-    return espVotes;
+    return List.generate(24, (index) {
+      return FlSpot(index.toDouble(), (hourlyVotes[index] ?? 0).toDouble());
+    });
+  }
+
+  double getMaxYValue() {
+    List<FlSpot> hourlyVotes = getHourlyVoteData();
+    double maxVote = hourlyVotes.map((spot) => spot.y).reduce((a, b) => a > b ? a : b);
+    return maxVote + 1; // Adding 1 for a better visual gap
   }
 
   @override
@@ -101,36 +109,35 @@ class _AnalyticsState extends State<Analytics> {
       backgroundColor: Colors.black87,
       body: Column(
         children: [
-          // Top Header and Navigation to EspVotesPage
+          // Top Header
           Padding(
             padding: const EdgeInsets.only(bottom: 10),
             child: Container(
               height: 60,
-              width: MediaQuery.of(context).size.width,
+              width: double.infinity,
               decoration: BoxDecoration(color: const Color(0xff0245a4)),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   IconButton(
-                    onPressed: () { Navigator.pop(context); },
-                    icon: const Icon(Icons.keyboard_double_arrow_left, color: Colors.white, size: 40),
+                    onPressed: () => Navigator.pop(context),
+                    icon: const Icon(Icons.keyboard_double_arrow_left,
+                        color: Colors.white, size: 40),
                   ),
                   Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: const [
-                      Text(
-                        "MOUNT ZION SILVER JUBILEE SCHOOL",
-                        style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
-                      ),
-                      Text(
-                        "GRAPH",
-                        style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
-                      ),
+                      Text("MOUNT ZION SILVER JUBILEE SCHOOL",
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold)),
+                      Text("GRAPH",
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold)),
                     ],
-                  ),
-                  IconButton(
-                    onPressed: navigateToEspVotesPage,
-                    icon: const Icon(Icons.analytics_outlined, color: Colors.white, size: 40),
                   ),
                 ],
               ),
@@ -150,38 +157,75 @@ class _AnalyticsState extends State<Analytics> {
                 if (pickedDate != null) {
                   setState(() {
                     selectedDate = pickedDate;
-                    saveSharedPreferences(pickedDate); // Save date in shared preferences
+                    saveSharedPreferences(pickedDate);
+                    fetchVoteRecords();
                   });
                 }
               },
               child: Text(
                 selectedDate != null
-                    ? 'Selected Date: ${_formatDate(selectedDate!)}'
+                    ? 'Selected Date: ${DateFormat('yyyy-MM-dd').format(selectedDate!)}'
                     : 'Select Date',
               ),
             ),
           ),
-          // Show vote records
+          // Display messages or graph for vote records
           Expanded(
-            child: voteRecords.isEmpty
-                ? const Center(child: CircularProgressIndicator())
-                : ListView.builder(
-                    itemCount: voteRecords.length,
-                    itemBuilder: (context, index) {
-                      final record = voteRecords[index];
-                      return ListTile(
-                        title: Text(record['candidate']!, style: const TextStyle(color: Colors.white)),
-                        subtitle: Text("Vote count: ${record['vote_count']}", style: const TextStyle(color: Colors.white)),
-                      );
-                    },
-                  ),
+            child: selectedDate == null
+                ? const Center(child: Text("Please pick a date", style: TextStyle(color: Colors.white)))
+                : voteRecords.isEmpty
+                    ? const Center(child: Text("No data available", style: TextStyle(color: Colors.white)))
+                    : Padding(
+                        padding: const EdgeInsets.all(40),
+                        child: LineChart(
+                          LineChartData(
+                            titlesData: FlTitlesData(
+                              leftTitles: AxisTitles(
+                                sideTitles: SideTitles(
+                                  showTitles: true,
+                                  reservedSize: 40,
+                                  interval: 1, // Set an interval to display every count
+                                  getTitlesWidget: (value, meta) {
+                                    if (value % 1 == 0) {
+                                      return Text(
+                                        '${value.toInt()}',
+                                        style: const TextStyle(color: Colors.white),
+                                      );
+                                    }
+                                    return Container(); // Return an empty container for other values
+                                  },
+                                ),
+                              ),
+                              bottomTitles: AxisTitles(
+                                sideTitles: SideTitles(
+                                  showTitles: true,
+                                  reservedSize: 30,
+                                  getTitlesWidget: (value, meta) {
+                                    return Text(
+                                      '${value.toInt()}:00',
+                                      style: const TextStyle(color: Colors.white),
+                                    );
+                                  },
+                                ),
+                              ),
+                            ),
+                            borderData: FlBorderData(show: true),
+                            lineBarsData: [
+                              LineChartBarData(
+                                spots: getHourlyVoteData(),
+                                isCurved: true,
+                                color: Colors.blue,
+                                dotData: FlDotData(show: true),
+                                belowBarData: BarAreaData(show: false),
+                              ),
+                            ],
+                            maxY: getMaxYValue(), // Specify max Y value based on your data
+                          ),
+                        ),
+                      ),
           ),
         ],
       ),
     );
-  }
-
-  String _formatDate(DateTime date) {
-    return "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
   }
 }

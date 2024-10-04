@@ -20,7 +20,7 @@ class MyApp extends StatelessWidget {
   final bool isLoggedIn;
   final String? espId;
 
-  const MyApp({Key? key, required this.isLoggedIn, this.espId}) : super(key: key);
+  const MyApp({super.key, required this.isLoggedIn, this.espId});
 
   @override
   Widget build(BuildContext context) {
