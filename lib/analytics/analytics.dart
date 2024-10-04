@@ -88,11 +88,24 @@ class _AnalyticsState extends State<Analytics> {
         date1.day == date2.day;
   }
 
+  // Filter vote records by the selected date
+  List<Map<String, dynamic>> filterVoteRecordsByDate() {
+    if (selectedDate == null) return [];
+
+    return voteRecords.where((record) {
+      DateTime recordDate = record['timestamp'];
+      return isSameDate(recordDate, selectedDate!);
+    }).toList();
+  }
+
   // Group votes by 1-hour intervals
   List<BarChartGroupData> getHourlyVoteData() {
     Map<int, int> hourlyVotes = {};
 
-    for (var record in voteRecords) {
+    // Get only the filtered records for the selected date
+    List<Map<String, dynamic>> filteredRecords = filterVoteRecordsByDate();
+
+    for (var record in filteredRecords) {
       DateTime timestamp = record['timestamp'];
       int hour = timestamp.hour;
 
@@ -217,7 +230,6 @@ class _AnalyticsState extends State<Analytics> {
                         borderData: FlBorderData(show: false),
                       ),
                     )),
-
           ),
         ],
       ),
