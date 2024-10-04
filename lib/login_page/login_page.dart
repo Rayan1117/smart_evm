@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:smart_evm/glassmorph/glassmorph.dart';
 import 'package:smart_evm/home_page/home_page.dart';
 
 class LoginPage extends StatefulWidget {
@@ -81,8 +80,6 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    double screenheight = MediaQuery.of(context).size.height;
-    double screenwidth = MediaQuery.of(context).size.width;
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(
@@ -146,11 +143,10 @@ class _LoginPageState extends State<LoginPage> {
                     style: TextStyle(fontSize: 18),
                   ),
                 ),
-              ),
+            ]),
             ),
           ),
         ),
-      ),
-    );
+      );
   }
 }
