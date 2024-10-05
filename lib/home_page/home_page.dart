@@ -3,6 +3,7 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:smart_evm/analytics/analytics.dart';
+import 'package:smart_evm/glassmorph/glassmorph.dart';
 
 class CandidateListPage extends StatefulWidget {
   final String? espId;
@@ -75,6 +76,7 @@ class _CandidateListPageState extends State<CandidateListPage> {
     super.dispose();
   }
 
+  // logos
   List<String> image = [
     'assets/c1.jpeg.jpg',
     'assets/c2.jpeg.jpg',
@@ -87,72 +89,79 @@ class _CandidateListPageState extends State<CandidateListPage> {
   ];
 
   Widget tile(String name, String vicename, String img, String votes) {
+    double screenwidth = MediaQuery.of(context).size.width;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
-      child: Container(
-        height: 100,
-        decoration: const BoxDecoration(
-          color: Color(0xff240046), // Update to match reference color
-          borderRadius: BorderRadius.all(Radius.circular(20)),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            const SizedBox(width: 60), // Same as in the reference code
-            Padding(
-              padding:
-                  const EdgeInsets.only(left: 8, right: 12, top: 8, bottom: 8),
-              child: CircleAvatar(
-                radius: 40,
-                backgroundImage: AssetImage(img),
-                backgroundColor: Colors.yellow, // Placeholder for image
-                child: img.isEmpty
-                    ? Text(
-                        name[0], // First letter of name if no image is provided
-                        style:
-                            const TextStyle(color: Colors.black, fontSize: 30),
-                      )
-                    : null, // No child if image is provided
+      child: Glassmorph(
+        blur: 0.2,
+        opacity: 0.15,
+        child: Container(
+          height: 100,
+          width: screenwidth < 1400 ? screenwidth * 0.95 : screenwidth * 0.65,
+          decoration: const BoxDecoration(
+            // color: Color(0xff240046), // Update to match reference color
+            borderRadius: BorderRadius.all(Radius.circular(20)),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              const SizedBox(width: 60), // Same as in the reference code
+              Padding(
+                padding: const EdgeInsets.only(
+                    left: 8, right: 12, top: 8, bottom: 8),
+                child: CircleAvatar(
+                  radius: 40,
+                  backgroundImage: AssetImage(img),
+                  backgroundColor: Colors.yellow, // Placeholder for image
+                  child: img.isEmpty
+                      ? Text(
+                          name[
+                              0], // First letter of name if no image is provided
+                          style: const TextStyle(
+                              color: Colors.black, fontSize: 30),
+                        )
+                      : null, // No child if image is provided
+                ),
               ),
-            ),
-            Expanded(
-              child: SingleChildScrollView(
-                child: Text(
-                  "$name\n$vicename",
-                  style: const TextStyle(
-                    color: Colors.yellow, // Reference style
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Text(
+                    "$name\n$vicename",
+                    style: const TextStyle(
+                      color: Colors.yellow, // Reference style
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(right: 10),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text(
-                    "VOTES",
-                    style: TextStyle(
-                      color: Colors.yellow, // Reference style
-                      fontWeight: FontWeight.bold,
-                      fontSize: 12,
+              Padding(
+                padding: const EdgeInsets.only(right: 10),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text(
+                      "VOTES",
+                      style: TextStyle(
+                        color: Colors.yellow, // Reference style
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                      ),
                     ),
-                  ),
-                  Text(
-                    votes,
-                    style: const TextStyle(
-                      color: Colors.white, // Same as reference
-                      fontWeight: FontWeight.bold,
-                      fontSize: 35,
+                    Text(
+                      votes,
+                      style: const TextStyle(
+                        color: Colors.white, // Same as reference
+                        fontWeight: FontWeight.bold,
+                        fontSize: 35,
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 120),
-                ],
+                    const SizedBox(width: 120),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
