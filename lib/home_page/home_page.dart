@@ -3,6 +3,7 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:smart_evm/analytics/analytics.dart';
+import 'package:smart_evm/login_page/login_page.dart'; // Import LoginPage
 
 class CandidateListPage extends StatefulWidget {
   final String? espId;
@@ -158,6 +159,43 @@ class _CandidateListPageState extends State<CandidateListPage> {
     );
   }
 
+  void _logout() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('isLoggedIn', false);
+    await prefs.remove('espId');
+
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => const LoginPage()),
+    );
+  }
+
+  void _confirmLogout() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Confirm Logout'),
+          content: const Text('Are you sure you want to log out?'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+              },
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                _logout(); // Call the logout method
+              },
+              child: const Text('Logout'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -169,6 +207,12 @@ class _CandidateListPageState extends State<CandidateListPage> {
           style: TextStyle(color: Colors.white),
         ),
         centerTitle: true,
+        leading: IconButton(
+            onPressed: () {
+              _confirmLogout(); // Show the logout confirmation dialog
+            },
+            icon: const Icon(Icons.logout, color: Colors.white, size: 30), // Logout icon
+          ),
         actions: [
           IconButton(
             onPressed: () {
