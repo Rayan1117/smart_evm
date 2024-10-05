@@ -25,35 +25,38 @@ class _AnalyticsState extends State<Analytics> {
     fetchVoteRecords();
   }
 
-  Future<void> fetchVoteRecords() async {
-    try {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      String espId = prefs.getString("espId") ?? "";
+Future<void> fetchVoteRecords() async {
+  try {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String espId = prefs.getString("espId") ?? "";
 
-      DatabaseEvent event = await database.child(espId).once();
-      if (event.snapshot.value != null) {
-        Map data = event.snapshot.value as Map;
-        setState(() {
-          voteRecords = []; // Initialize to an empty list
-          if (data.containsKey('vote_details')) {
-            List<dynamic> voteDetails = data['vote_details'] as List<dynamic>;
-            for (var detail in voteDetails) {
-              DateTime timestamp = DateTime.parse(detail['timestamp']);
-              voteRecords.add({"timestamp": timestamp});
-            }
-          }
-        });
-      } else {
-        // No data case
-        setState(() {
-          voteRecords = []; // Ensure it's empty
-        });
-      }
-    } catch (e) {
-      print('Error fetching data: $e');
-      // Handle errors as needed
+    DatabaseEvent event = await database.child(espId).once();
+    if (event.snapshot.value != null) {
+      Map data = event.snapshot.value as Map;
+      setState(() {
+        voteRecords = []; // Initialize to an empty list
+        if (data.containsKey('vote_details')) {
+          Map<dynamic, dynamic> voteDetailsMap = data['vote_details'] as Map<dynamic, dynamic>;
+          voteDetailsMap.forEach((key, detail) {
+            var timestampValue = detail['timestamp'];
+            
+            // If the timestamp is a string in a different format (e.g., ISO 8601)
+            DateTime timestamp = DateFormat('yyyy-MM-ddTHH:mm:ssZ').parse(timestampValue);
+            voteRecords.add({"timestamp": timestamp});
+          });
+        }
+      });
+    } else {
+      // No data case
+      setState(() {
+        voteRecords = []; // Ensure it's empty
+      });
     }
+  } catch (e) {
+    print('Error fetching data: $e');
+    // Handle errors as needed
   }
+}
 
   Future<void> loadSharedPreferences() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
