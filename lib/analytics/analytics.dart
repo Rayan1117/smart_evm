@@ -4,6 +4,7 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
+import 'package:smart_evm/home_page/home_page.dart';
 
 class Analytics extends StatefulWidget {
   const Analytics({super.key});
@@ -24,35 +25,38 @@ class _AnalyticsState extends State<Analytics> {
     fetchVoteRecords();
   }
 
-  Future<void> fetchVoteRecords() async {
-    try {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      String espId = prefs.getString("espId") ?? "";
+Future<void> fetchVoteRecords() async {
+  try {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String espId = prefs.getString("espId") ?? "";
 
-      DatabaseEvent event = await database.child(espId).once();
-      if (event.snapshot.value != null) {
-        Map data = event.snapshot.value as Map;
-        setState(() {
-          voteRecords = []; // Initialize to an empty list
-          if (data.containsKey('vote_details')) {
-            List<dynamic> voteDetails = data['vote_details'] as List<dynamic>;
-            for (var detail in voteDetails) {
-              DateTime timestamp = DateTime.parse(detail['timestamp']);
-              voteRecords.add({"timestamp": timestamp});
-            }
-          }
-        });
-      } else {
-        // No data case
-        setState(() {
-          voteRecords = []; // Ensure it's empty
-        });
-      }
-    } catch (e) {
-      print('Error fetching data: $e');
-      // Handle errors as needed
+    DatabaseEvent event = await database.child(espId).once();
+    if (event.snapshot.value != null) {
+      Map data = event.snapshot.value as Map;
+      setState(() {
+        voteRecords = []; // Initialize to an empty list
+        if (data.containsKey('vote_details')) {
+          Map<dynamic, dynamic> voteDetailsMap = data['vote_details'] as Map<dynamic, dynamic>;
+          voteDetailsMap.forEach((key, detail) {
+            var timestampValue = detail['timestamp'];
+            
+            // If the timestamp is a string in a different format (e.g., ISO 8601)
+            DateTime timestamp = DateFormat('yyyy-MM-ddTHH:mm:ssZ').parse(timestampValue);
+            voteRecords.add({"timestamp": timestamp});
+          });
+        }
+      });
+    } else {
+      // No data case
+      setState(() {
+        voteRecords = []; // Ensure it's empty
+      });
     }
+  } catch (e) {
+    print('Error fetching data: $e');
+    // Handle errors as needed
   }
+}
 
   Future<void> loadSharedPreferences() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -99,45 +103,50 @@ class _AnalyticsState extends State<Analytics> {
 
   double getMaxYValue() {
     List<FlSpot> hourlyVotes = getHourlyVoteData();
-    double maxVote =
-        hourlyVotes.map((spot) => spot.y).reduce((a, b) => a > b ? a : b);
+    double maxVote = hourlyVotes.map((spot) => spot.y).reduce((a, b) => a > b ? a : b);
     return maxVote + 1; // Adding 1 for a better visual gap
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
-          icon: const Icon(
-            Icons.arrow_back_rounded,
-            color: Color.fromARGB(255, 255, 255, 255),
-          ),
-        ),
-        backgroundColor: const Color(0xff10002b),
-        centerTitle: true,
-        title: const Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text("MOUNT ZION SILVER JUBILEE SCHOOL",
-                style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold)),
-            Text("GRAPH",
-                style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold)),
-          ],
-        ),
-      ),
       backgroundColor: Colors.black87,
       body: Column(
         children: [
+          // Top Header
+          Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: Container(
+              height: 60,
+              width: double.infinity,
+              decoration: BoxDecoration(color: const Color(0xff0245a4)),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  IconButton(
+                    onPressed: () => Navigator.pop(context),
+                    icon: const Icon(Icons.keyboard_double_arrow_left,
+                        color: Colors.white, size: 40),
+                  ),
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: const [
+                      Text("MOUNT ZION SILVER JUBILEE SCHOOL",
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold)),
+                      Text("GRAPH",
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold)),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
           // Date Picker
           Padding(
             padding: const EdgeInsets.all(8.0),
