@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:smart_evm/home_page/home_page.dart';
+import 'package:smart_evm/manual/info.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -29,7 +30,8 @@ class _LoginPageState extends State<LoginPage> {
       String espId = prefs.getString('espId') ?? '';
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => CandidateListPage(espId: espId)),
+        MaterialPageRoute(
+            builder: (context) => CandidateListPage(espId: espId)),
       );
     }
   }
@@ -42,7 +44,8 @@ class _LoginPageState extends State<LoginPage> {
       DataSnapshot snapshot = await _database.child(espId).get();
 
       if (snapshot.exists) {
-        Map<dynamic, dynamic> userData = snapshot.value as Map<dynamic, dynamic>;
+        Map<dynamic, dynamic> userData =
+            snapshot.value as Map<dynamic, dynamic>;
 
         if (userData['password'] == password) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -76,9 +79,98 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
+  // Method to display the dialog with the PDF content
+   void _showManualDialog(BuildContext context) {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      // Use MediaQuery to get the screen size
+      final screenHeight = MediaQuery.of(context).size.height;
+      final screenWidth = MediaQuery.of(context).size.width;
+
+      return AlertDialog(
+        backgroundColor: Color(0xff240046), // Dark purple background color matching the app
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20.0), // Rounded corners
+        ),
+        // Set the dialog's height and width to be slightly smaller than the screen size
+        contentPadding: EdgeInsets.zero, // No padding around the dialog
+        insetPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 20), // Slight padding around dialog
+        titlePadding: const EdgeInsets.all(20), // Padding for the title
+        title: const Text(
+          "User Manual",
+          style: TextStyle(
+            color: Colors.white, // White title text to contrast the dark background
+            fontWeight: FontWeight.bold,
+            fontSize: 20.0,
+          ),
+        ),
+        content: Container(
+          height: screenHeight * 0.85, // 85% of screen height
+          width: screenWidth * 0.95, // 95% of screen width
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15), // Padding inside the dialog
+          decoration: BoxDecoration(
+            color: Color(0xff3e065f), // Slightly lighter purple for the content area
+            borderRadius: BorderRadius.circular(20.0), // Match the rounded corners of the dialog
+          ),
+          child: Scrollbar(
+            thumbVisibility: true,
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(16.0), // Padding inside the scrollable content
+              child: Text(
+                Info().info, // The manual text
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: Colors.white70, // Off-white text for readability
+                  height: 1.5, // Line height for readability
+                ),
+              ),
+            ),
+          ),
+        ),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 10.0, bottom: 10.0),
+            child: TextButton(
+              style: TextButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
+                backgroundColor: Color(0xff7A1CAC), // Button color matching the gradient in the app
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10.0), // Rounded button
+                ),
+              ),
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+              },
+              child: const Text(
+                "Close",
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white, // White button text for contrast
+                ),
+              ),
+            ),
+          ),
+        ],
+      );
+    },
+  );
+}
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: Text('Login'),
+        leading: IconButton(
+          icon: Icon(Icons.info),
+          tooltip: 'Download Manual',
+          onPressed: () {
+            _showManualDialog(context); // Show the manual when pressed
+          },
+        ),
+      ),
       body: Container(
         // Gradient background
         decoration: const BoxDecoration(
@@ -118,20 +210,20 @@ class _LoginPageState extends State<LoginPage> {
                   child: TextField(
                     controller: _espIdController,
                     style: const TextStyle(color: Colors.white),
-                    decoration: InputDecoration(
-                      enabledBorder: const OutlineInputBorder(
+                    decoration:const InputDecoration(
+                      enabledBorder: OutlineInputBorder(
                         borderSide: BorderSide(color: Colors.white, width: 1.5),
                       ),
-                      border: const OutlineInputBorder(
+                      border: OutlineInputBorder(
                         borderSide: BorderSide(color: Colors.white, width: 1.5),
                       ),
-                      focusedBorder: const OutlineInputBorder(
+                      focusedBorder: OutlineInputBorder(
                         borderSide: BorderSide(color: Colors.white, width: 1.5),
                       ),
                       labelText: 'ESP ID',
                       hintText: 'Enter ESP ID',
-                      hintStyle: const TextStyle(color: Colors.white),
-                      labelStyle: const TextStyle(color: Colors.white),
+                      hintStyle: TextStyle(color: Colors.white),
+                      labelStyle: TextStyle(color: Colors.white),
                     ),
                   ),
                 ),
@@ -142,18 +234,18 @@ class _LoginPageState extends State<LoginPage> {
                     controller: _passwordController,
                     style: const TextStyle(color: Colors.white),
                     obscureText: true,
-                    decoration: InputDecoration(
-                      enabledBorder: const OutlineInputBorder(
+                    decoration:const InputDecoration(
+                      enabledBorder: OutlineInputBorder(
                         borderSide: BorderSide(color: Colors.white, width: 1.5),
                       ),
-                      border: const OutlineInputBorder(),
-                      focusedBorder: const OutlineInputBorder(
+                      border: OutlineInputBorder(),
+                      focusedBorder: OutlineInputBorder(
                         borderSide: BorderSide(color: Colors.white, width: 1.5),
                       ),
                       labelText: 'Password',
                       hintText: 'Enter Password',
-                      hintStyle: const TextStyle(color: Colors.white),
-                      labelStyle: const TextStyle(color: Colors.white),
+                      hintStyle: TextStyle(color: Colors.white),
+                      labelStyle: TextStyle(color: Colors.white),
                     ),
                   ),
                 ),
