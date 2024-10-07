@@ -4,6 +4,7 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
+import 'package:smart_evm/glassmorph/colors.dart';
 import 'package:smart_evm/home_page/home_page.dart';
 
 class Analytics extends StatefulWidget {
@@ -128,21 +129,15 @@ Future<void> fetchVoteRecords() async {
                     icon: const Icon(Icons.keyboard_double_arrow_left,
                         color: Colors.white, size: 40),
                   ),
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: const [
-                      Text("MOUNT ZION SILVER JUBILEE SCHOOL",
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold)),
-                      Text("GRAPH",
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold)),
-                    ],
-                  ),
+                  Text("NOVOTECH SMART EVM",
+                      style: TextStyle(
+                          color: Colors.yellow,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold)),
+                  Icon(
+                    Icons.business_outlined,
+                    color: barblue,
+                  )
                 ],
               ),
             ),

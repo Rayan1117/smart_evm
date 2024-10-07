@@ -3,9 +3,9 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:smart_evm/analytics/analytics.dart';
+import 'package:smart_evm/glassmorph/colors.dart';
 import 'package:smart_evm/glassmorph/glassmorph.dart';
-
-import '../login_page/login_page.dart';
+import 'package:smart_evm/login_page/login_page.dart'; // Import LoginPage
 
 class CandidateListPage extends StatefulWidget {
   final String? espId;
@@ -78,7 +78,6 @@ class _CandidateListPageState extends State<CandidateListPage> {
     super.dispose();
   }
 
-  // logos
   List<String> image = [
     'assets/c1.jpeg.jpg',
     'assets/c2.jpeg.jpg',
@@ -91,15 +90,13 @@ class _CandidateListPageState extends State<CandidateListPage> {
   ];
 
   Widget tile(String name, String vicename, String img, String votes) {
-    double screenwidth = MediaQuery.of(context).size.width;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
       child: Glassmorph(
         blur: 0.2,
-        opacity: 0.15,
+        opacity: 0.2,
         child: Container(
           height: 100,
-          width: screenwidth < 1400 ? screenwidth * 0.95 : screenwidth * 0.65,
           decoration: const BoxDecoration(
             // color: Color(0xff240046), // Update to match reference color
             borderRadius: BorderRadius.all(Radius.circular(20)),
@@ -210,13 +207,20 @@ class _CandidateListPageState extends State<CandidateListPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor:
-          const Color(0xff10002b), // Update to match reference background
+          myblue, // Update to match reference background
       appBar: AppBar(
         title: const Text(
-          'MountZion Silver Jubilee School',
-          style: TextStyle(color: Colors.white),
+          'NOVOTECH SMART EVM',
+          style: TextStyle(color: Colors.yellow),
         ),
         centerTitle: true,
+        leading: IconButton(
+          onPressed: () {
+            _confirmLogout(); // Show the logout confirmation dialog
+          },
+          icon: const Icon(Icons.logout,
+              color: Colors.white, size: 30), // Logout icon
+        ),
         actions: [
           IconButton(
             onPressed: () {
@@ -231,8 +235,7 @@ class _CandidateListPageState extends State<CandidateListPage> {
                 color: Colors.white, size: 40), // Updated style
           ),
         ],
-        backgroundColor:
-            const Color(0xff240046), // Update to match reference color
+        backgroundColor: barblue, // Update to match reference color
       ),
       body: espId == null
           ? const Center(
@@ -257,7 +260,7 @@ class _CandidateListPageState extends State<CandidateListPage> {
                   child: CircularProgressIndicator(
                       color: Colors.yellow)), // Update loader color
       bottomNavigationBar: Container(
-        color: const Color(0xff240046), // Update to match reference style
+        color: barblue, // Update to match reference style
         padding: const EdgeInsets.all(16.0),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -265,17 +268,20 @@ class _CandidateListPageState extends State<CandidateListPage> {
             Text(
               'Max Votes: $maxVotes',
               style: const TextStyle(
-                  color: Colors.white), // Match reference text color
+                  color: Color.fromARGB(
+                      255, 247, 224, 17)), // Match reference text color
             ),
             Text(
               'Votes Polled: $totalPolledVotes',
               style: const TextStyle(
-                  color: Colors.white), // Match reference text color
+                  color: Color.fromARGB(
+                      255, 247, 224, 17)), // Match reference text color
             ),
             Text(
               'Remaining: ${maxVotes - totalPolledVotes}',
               style: const TextStyle(
-                  color: Colors.white), // Match reference text color
+                  color: Color.fromARGB(
+                      255, 247, 224, 17)), // Match reference text color
             ),
           ],
         ),

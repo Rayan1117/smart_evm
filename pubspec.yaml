@@ -74,6 +74,7 @@ flutter:
     - assets/c5.jpeg.jpg
     - assets/c6.jpeg.jpg
     - assets/c7.jpeg.jpg
+    - assets/bgimg.jpg
 
 
   # An image asset can refer to one or more resolution-specific "variants", see
