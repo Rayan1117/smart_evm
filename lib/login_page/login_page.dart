@@ -135,8 +135,8 @@ class _LoginPageState extends State<LoginPage> {
                             borderSide:
                                 BorderSide(color: Colors.white, width: 1.5),
                           ),
-                          labelText: 'ESP ID',
-                          hintText: 'Enter ESP ID',
+                          labelText: 'EVM Serial Number',
+                          hintText: 'Enter EVM Serial Number',
                           hintStyle: const TextStyle(color: Colors.white),
                           labelStyle: const TextStyle(color: Colors.white),
                         ),
@@ -174,10 +174,10 @@ class _LoginPageState extends State<LoginPage> {
                         padding: const EdgeInsets.symmetric(vertical: 16.0),
                       ),
                       child: const Text(
-                        "LOGIN",
+                        "Poll Status",
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
-                          fontSize: 12.0,
+                          fontSize: 20.0,
                           color: Colors.black,
                         ),
                       ),

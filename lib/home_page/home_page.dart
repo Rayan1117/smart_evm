@@ -79,14 +79,14 @@ class _CandidateListPageState extends State<CandidateListPage> {
   }
 
   List<String> image = [
+    'assets/c7.jpeg.jpg',
     'assets/c1.jpeg.jpg',
     'assets/c2.jpeg.jpg',
-    'assets/c3.jpeg.jpg',
     'assets/c4.jpeg.jpg',
-    'assets/c5.jpeg.jpg',
-    'assets/c6.jpeg.jpg',
-    'assets/c7.jpeg.jpg',
-    'assets/c2.jpeg.jpg'
+    'assets/uc5.png',
+    'assets/uc6.png',
+    'assets/uc7.png',
+    'assets/uc8.png'
   ];
 
   Widget tile(String name, String vicename, String img, String votes) {
